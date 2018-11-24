@@ -94,12 +94,12 @@ end
 put '/cart/:username.json' do |username|
    carri=Carrito.where(username: username).first
    if carri then
-      #agrego item al carrito viejo
+      carri.update(items:carri.items << json_params).to_json
    else
          carrito=Carrito.create(username: username,total: "0")
          if carrito.save
            status 201
-           #agrego item al carrito nuevo
+           carrito.update(items:carri.items << json_params).to_json
          else
            status 422
          end
