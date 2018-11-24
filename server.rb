@@ -105,7 +105,7 @@ put '/cart/:username.json' do |username|
          end
   end
 
-put '/cart/:username/:item_id.json'do |username|
+delete '/cart/:username/:item_id.json'do |username|
    carri=Carrito.where(username: username).first
    if carri then
       CarritoSerializer.new(carri).to_json
