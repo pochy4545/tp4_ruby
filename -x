@@ -1,8 +1,0 @@
-HTTP/1.1 200 OK 
-Content-Type: application/json
-Content-Length: 0
-X-Content-Type-Options: nosniff
-Server: WEBrick/1.4.2 (Ruby/2.5.1/2018-03-29)
-Date: Sat, 24 Nov 2018 17:40:56 GMT
-Connection: Keep-Alive
-
