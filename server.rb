@@ -9,8 +9,8 @@ Mongoid.load! "mongoid.config"
 class Carrito
   include Mongoid::Document
   field :username, type: String
-  field :total, type: String
-  field :fecha_creacion, type: String
+  field :total, type: Float
+  field :fecha_creacion, type: Date
   field :items
 end
 
@@ -20,12 +20,8 @@ class Item
   field :id, type: String
   field :sku, type: String
   field :description, type: String
-  field :stock, type: String
-  field :price, type: String
-
-  validates :id, presence: true
-  validates :sku, presence: true
-  validates :description, presence: true
+  field :stock, type: Integer
+  field :price, type: Float
 
 end
 #parametros en el body
@@ -42,17 +38,20 @@ before do
     content_type :json
 end
 
+#verificado
 get '/items.json' do
   i=Item.all
   i.map { |item| ItemSerializer.new(item) }.to_json
 end
 
+#verificado
 get '/items/:id.json'do |id|
   item=Item.where(id: id).first
   halt(404, { message:'Item inexistente'}.to_json) unless item
   ItemSerializer.new(item).to_json
 end
 
+#verificado
 post '/items.json' do
   item = Item.new(json_params)
     if item.save
@@ -62,18 +61,19 @@ post '/items.json' do
       body ItemSerializer.new(item).to_json
     end
 end
-
+#verificado (como verifico la presencia en json_params)
 put '/items/:id.json' do |id|
   item = Item.where(id: id).first
     halt(404, { message:'No existe el item a actualizar'}.to_json) unless item
-    if item.update_attributes(json_params)
-      ItemSerializer.new(item).to_json
-    else
-      status 422
-      item ItemSerializer.new(item).to_json
-    end
+     if item.update_attributes(json_params)
+       ItemSerializer.new(item).to_json
+     else
+       status 422
+       item ItemSerializer.new(item).to_json
+     end
   end
 
+#un array de items? al item le decremeto en uno cuando lo agrego al carrito o no tiene sentido hasta que se compre , actualizo total no?
 get '/cart/:username.json'do |username|
    carri=Carrito.where(username: username).first
    if carri then
@@ -82,6 +82,7 @@ get '/cart/:username.json'do |username|
          carrito=Carrito.create(username: username,total: "0", fecha_creacion: Date.today.to_s ,items:Array.new)
    	 if carrito.save
   	   status 201
+           # no se puede esto hay que concatenar?
   	   body CarritoSerializer.new(carrito).to_json
            body "carrito creado"
   	 else
@@ -93,24 +94,24 @@ end
 put '/cart/:username.json' do |username|
    carri=Carrito.where(username: username).first
    if carri then
-      CarritoSerializer.new(carri).to_json
+      #agrego item al carrito viejo
    else
-         carrito=Carrito.create(username: username,total: "0", fecha_c$
+         carrito=Carrito.create(username: username,total: "0")
          if carrito.save
            status 201
-           body CarritoSerializer.new(carrito).to_json
-           body "carrito creado"
+           #agrego item al carrito nuevo
          else
            status 422
          end
   end
+end
 
-delete '/cart/:username/:item_id.json'do |username|
-   carri=Carrito.where(username: username).first
+delete '/cart/:username/:item_id.json'do 
+   carri=Carrito.where(username: params[:splat].first).first
    if carri then
-      CarritoSerializer.new(carri).to_json
+      #borro item
    else
-         carrito=Carrito.create(username: username,total: "0", fecha_c$
+         carrito=Carrito.create(username: params[:splat].first)
          if carrito.save
            status 201
            body CarritoSerializer.new(carrito).to_json
@@ -121,3 +122,5 @@ delete '/cart/:username/:item_id.json'do |username|
   end
 end
 
+
+#middlewares Rack para que?
