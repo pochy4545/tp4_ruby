@@ -11,6 +11,7 @@ class Carrito
   field :username, type: String
   field :total, type: String
   field :fecha_creacion, type: String
+  field :items
 end
 
 class Item
@@ -29,12 +30,11 @@ class Item
 end
 #parametros en el body
 def json_params
-      begin
-        JSON.parse(request.body.read)
-      rescue
-        halt 400, { message:'Invalid JSON' }.to_json
-      end
-
+  begin
+    JSON.parse(request.body.read)
+   rescue
+    halt 400, { message:'Invalid JSON' }.to_json
+   end
 end
 
 #sinatra
@@ -54,7 +54,7 @@ get '/items/:id.json'do |id|
 end
 
 post '/items.json' do
- item = Item.new(json_params)
+  item = Item.new(json_params)
     if item.save
       status 201
     else
@@ -75,19 +75,49 @@ put '/items/:id.json' do |id|
   end
 
 get '/cart/:username.json'do |username|
- carrito=Carrito.where(username: username).first
- carritonew=Carrito.new().to_json unless carrito.to_json
+   carri=Carrito.where(username: username).first
+   if carri then
+      CarritoSerializer.new(carri).to_json
+   else
+         carrito=Carrito.create(username: username,total: "0", fecha_creacion: Date.today.to_s ,items:Array.new)
+   	 if carrito.save
+  	   status 201
+  	   body CarritoSerializer.new(carrito).to_json
+           body "carrito creado"
+  	 else
+  	   status 422
+  	 end
+  end
 end
 
-put '/cart/:username.json' do
-  carrito=Carrito.where(username: username).first
-  carritonew=Carrito.new().to_json unless carrito.to_json
-
-end
+put '/cart/:username.json' do |username|
+   carri=Carrito.where(username: username).first
+   if carri then
+      CarritoSerializer.new(carri).to_json
+   else
+         carrito=Carrito.create(username: username,total: "0", fecha_c$
+         if carrito.save
+           status 201
+           body CarritoSerializer.new(carrito).to_json
+           body "carrito creado"
+         else
+           status 422
+         end
+  end
 
 put '/cart/:username/:item_id.json'do |username|
-   carrito=Carrito.where(username: username).first
-
-  
+   carri=Carrito.where(username: username).first
+   if carri then
+      CarritoSerializer.new(carri).to_json
+   else
+         carrito=Carrito.create(username: username,total: "0", fecha_c$
+         if carrito.save
+           status 201
+           body CarritoSerializer.new(carrito).to_json
+           body "carrito creado"
+         else
+           status 422
+         end
+  end
 end
 

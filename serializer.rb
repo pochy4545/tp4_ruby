@@ -16,3 +16,21 @@ class ItemSerializer
   end
 end
 
+class CarritoSerializer
+  def initialize(carrito)
+    @carrito =carrito
+  end
+
+ def as_json(*)
+   data= {
+     id:@carrito.id.to_s,
+     fecha_creacion:@carrito.fecha_creacion,
+     total:@carrito.total,
+     username:@carrito.username,
+     items:@carrito.items
+    }
+    data[:errors] = @carrito.errors if@carrito.errors.any?
+    data
+  end
+
+end
