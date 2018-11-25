@@ -104,7 +104,9 @@ put '/cart/:username.json' do |username|
          carrito=Carrito.create(username: username,total: "0", fecha_creacion: Date.today.to_s ,items:Array.new)
          if carrito.save
            status 201
-           carrito.update(items:carri.items << ItemReduceSerialize.new(item).to_json)
+           #hay que actualizar el total verificar que exita el producto con id
+           #y que los id no se repitan?
+           carrito.update(items:carrito.items << ItemReduceSerialize.new(item).to_json ,total: )
          else
            status 422
          end
