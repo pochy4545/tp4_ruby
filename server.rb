@@ -10,7 +10,7 @@ class Carrito
   include Mongoid::Document
   field :username, type: String
   field :total, type: Float
-  field :fecha_creacion, type: Date
+  field :fecha_creacion, type: String
   field :items
 end
 
@@ -23,6 +23,11 @@ class Item
   field :stock, type: Integer
   field :price, type: Float
 
+end
+class ItemReduce
+   include Mongoid::Document
+   field :id, type: String
+   field :cantidad, type:Integer
 end
 #parametros en el body
 def json_params
@@ -41,7 +46,7 @@ end
 #verificado
 get '/items.json' do
   i=Item.all
-  i.map { |item| ItemSerializer.new(item) }.to_json
+  i.map { |item| ItemSerializer.new(item)}.to_json
 end
 
 #verificado
@@ -73,7 +78,7 @@ put '/items/:id.json' do |id|
      end
   end
 
-#un array de items? al item le decremeto en uno cuando lo agrego al carrito o no tiene sentido hasta que se compre , actualizo total no?
+#un array de items?
 get '/cart/:username.json'do |username|
    carri=Carrito.where(username: username).first
    if carri then
@@ -82,9 +87,8 @@ get '/cart/:username.json'do |username|
          carrito=Carrito.create(username: username,total: "0", fecha_creacion: Date.today.to_s ,items:Array.new)
    	 if carrito.save
   	   status 201
-           # no se puede esto hay que concatenar?
-  	   body CarritoSerializer.new(carrito).to_json
-           body "carrito creado"
+  	   body "Carritocreado:"+CarritoSerializer.new(carrito).to_json
+           
   	 else
   	   status 422
   	 end
@@ -93,13 +97,14 @@ end
 
 put '/cart/:username.json' do |username|
    carri=Carrito.where(username: username).first
+   item = ItemReduce.new(json_params)
    if carri then
-      carri.update(items:carri.items << json_params).to_json
+      carri.update(items:carri.items << ItemReduceSerialize.new(item).to_json)
    else
-         carrito=Carrito.create(username: username,total: "0")
+         carrito=Carrito.create(username: username,total: "0", fecha_creacion: Date.today.to_s ,items:Array.new)
          if carrito.save
            status 201
-           carrito.update(items:carri.items << json_params).to_json
+           carrito.update(items:carri.items << ItemReduceSerialize.new(item).to_json)
          else
            status 422
          end
