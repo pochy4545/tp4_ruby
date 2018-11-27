@@ -1,0 +1,79 @@
+require_relative 'model'
+require 'json'
+require 'bundler'
+require 'mongoid'
+Bundler.require
+
+class ItemSerializer
+  def initialize(item)
+    @item = item
+  end
+
+  def as_json(*)
+    data = {
+      id:@item.id.to_s,
+      sku:@item.sku,
+      description:@item.description,
+      stock:@item.stock,
+      price:@item.price
+    }
+    data[:errors] = @item.errors if@item.errors.any?
+    data
+  end
+end
+
+before do
+    content_type :json
+end
+
+get '/items.json' do
+  i=Item.all
+  i.map { |item| ItemSerializer.new(item) }.to_json
+end
+
+get '/items/:id.json'do |id|
+  item=Item.where(id: id).first
+  halt(404, { message:'Item inexistente'}.to_json) unless item
+  ItemSerializer.new(item).to_json
+end
+
+def json_params
+      begin
+        JSON.parse(request.body.read)
+      rescue
+        halt 400, { message:'Invalid JSON' }.to_json
+      end
+    
+end
+
+post '/items.json' do
+ item = Item.new(json_params)
+    if item.save
+      status 201
+    else
+      status 422
+      body ItemSerializer.new(item).to_json
+    end
+end
+
+put '/items/:id.json' do
+  item = Item.where(id: id).first
+    halt(404, { message:'No existe el item a actualizar'}.to_json) unless item
+    if item.update_attributes(json_params)
+      ItemSerializer.new(item).to_json
+    else
+      status 422
+      item IetmSerializer.new(item).to_json
+    end
+  end
+end
+
+get '/cart/:username.json'do
+end
+
+put '/cart/:username.json' do
+end
+
+put '/cart/:username/:item_id.json'do
+end
+
