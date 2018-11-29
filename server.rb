@@ -106,7 +106,7 @@ put '/cart/:username.json' do |username|
            status 201
            #hay que actualizar el total verificar que exita el producto con id
            #y que los id no se repitan?
-           carrito.update(items:carrito.items << ItemReduceSerialize.new(item).to_json ,total: )
+           carrito.update(items:carrito.items << ItemReduceSerialize.new(item).to_json ,total:0 )
          else
            status 422
          end
