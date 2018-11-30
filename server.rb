@@ -87,12 +87,12 @@ put '/cart/:username.json' do |username|
   	 else
             if Item.where(id: item.id).first.stock.to_i >= item.cantidad.to_i then
         	 if carri then
-  		    carri.update(items:carri.items << ItemReduceSerialize.new(item).to_json)
+  		    carri.update(items:carri.items << ItemReduceSerialize.new(item).as_json)
   		 else
   		       carrito=Carrito.create(username: username,total: "0", fecha_creacion: Date.today.to_s ,items:Array.new)
   		       if carrito.save
   		         status 201
-        		   carrito.update(items:carrito.items << ItemReduceSerialize.new(item).to_json )
+        		   carrito.update(items:carrito.items << ItemReduceSerialize.new(item).as_json)
         		 else
         		   status 422
         		 end
