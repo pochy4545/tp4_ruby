@@ -106,20 +106,18 @@ put '/cart/:username.json' do |username|
    end
 end
 
-#delete '/cart/:username/:item_id.json'do  
-#   carri=Carrito.where(username: params[:splat].first).first
-#   if carri then
-#       itemstotal=carri.items.map
-#       carri.update()
-#   else
-#         carrito=Carrito.create(username: params[:splat].last)
-#         if carrito.save
-#           status 200
-#           body CarritoSerializer.new(carrito).to_json
-#           body "carrito creado"
-#         else
-#           status 422
-#         end
-#  end
-#end
-
+delete '/cart/:username/:item_id.json'do |username, item_id| 
+   carri=Carrito.where(username: username).first
+   if carri then
+        carri.update(items:carri.items.reject{|i| i["id"]==item_id})
+        status 200
+   else
+         carrito=Carrito.create(username: username,total: "0", fecha_creacion: Date.today.to_s ,items:Array.new)
+         if carrito.save
+           body CarritoSerializer.new(carrito).to_json
+           halt 201, { message:'se te creeo un carrito nuevo'}.to_json
+         else
+           status 422
+         end
+  end
+end
