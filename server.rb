@@ -87,6 +87,7 @@ put '/cart/:username.json' do |username|
   	 else
             if Item.where(id: item.id).first.stock.to_i >= item.cantidad.to_i then
         	 if carri then
+                    #guardo el item serializado ya que uso una base de datos no relacional y me jodia mucho ya que el objeto no se convierte correctamente a un ObjectId en la consulta.
   		    carri.update(items:carri.items << ItemReduceSerialize.new(item).as_json)
   		 else
   		       carrito=Carrito.create(username: username,total: "0", fecha_creacion: Date.today.to_s ,items:Array.new)
